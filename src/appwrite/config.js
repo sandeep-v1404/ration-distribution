@@ -1,8 +1,8 @@
 import { Client, Account, Databases, Functions } from "appwrite";
 
 const client = new Client()
-  .setEndpoint("http://142.93.212.117/v1") // Your API Endpoint
-  .setProject("63ee4f176fb8f0fead98"); // Your project ID
+  .setEndpoint(process.env.REACT_APP_API_ENDPOINT) // Your API Endpoint
+  .setProject(process.env.REACT_APP_PROJECT_ID); // Your project ID
 
 export const account = new Account(client);
 export const databases = new Databases(client);
