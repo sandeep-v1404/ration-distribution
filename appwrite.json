@@ -1,0 +1,51 @@
+{
+    "projectId": "63ee4f176fb8f0fead98",
+    "projectName": "RationDistrbutionUsingBlockchain",
+    "functions": [
+        {
+            "$id": "63ef36ba3f000cb89c55",
+            "name": "signup",
+            "runtime": "node-16.0",
+            "path": "functions/signup",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
+        },
+        {
+            "$id": "63f0ace5199df9c9eb33",
+            "name": "login",
+            "runtime": "node-16.0",
+            "path": "functions/login",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
+        },
+        {
+            "$id": "63f171eac3256aec74bf",
+            "name": "auth",
+            "runtime": "node-16.0",
+            "path": "functions/auth",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
+        }
+    ]
+}
