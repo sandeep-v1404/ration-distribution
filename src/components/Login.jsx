@@ -5,8 +5,7 @@ import { functions } from "../appwrite/config";
 const Login = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({
-    name: "ss",
-    email: "",
+    aadhar: "",
     password: "",
   });
 
@@ -22,7 +21,7 @@ const Login = () => {
       function (res) {
         if (JSON.parse(res.response).token) {
           localStorage.setItem("profile", res.response);
-          navigate("/profile", { replace: true }); //success
+          navigate("/purchase-items", { replace: true }); //success
         } else {
           console.log(res);
         }

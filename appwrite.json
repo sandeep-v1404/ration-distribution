@@ -46,6 +46,36 @@
             "events": [],
             "schedule": "",
             "timeout": 15
+        },
+        {
+            "$id": "63f23fe91eb3faa6c484",
+            "name": "createItem",
+            "runtime": "node-16.0",
+            "path": "functions/createItem",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
+        },
+        {
+            "$id": "63f245c34da859b96db5",
+            "name": "getItems",
+            "runtime": "node-16.0",
+            "path": "functions/getItems",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
         }
     ]
 }
