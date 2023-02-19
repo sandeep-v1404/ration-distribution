@@ -883,7 +883,7 @@ const RegisterAsUser = () => {
   // Sign the string message
   let flatSig = await wallet.signMessage(message);
   let contractAddress = '0x9c335131F980372cA7acfbc9a6D71E93199e841d';
-  let pk = '50a7a3b0daad52f69067c15791ba2a419468da60ba2df93a831a372829a0f711';
+  
   let address = 0xaF23F57eE786d0d0a41744EFc6157f1f7A941B87;
   const signer = new ethers.Wallet(w.privateKey, provider);
 let contract = new Contract(contractAddress, abi, signer);
