@@ -1,11 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { functions } from "../appwrite/config";
+import { ethers } from 'ethers'
+import Web3Modal from 'web3modal'
+
+import axios from 'axios'
+import { NFTStorage, File } from 'nft.storage';
+
+const NFT_STORAGE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDgwMjlFMGVFNWVGRmQxZjhGNEI2MjRDODUyQjYwMGFjMkMwNDU2M2UiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1ODExOTEzNjY1MiwibmFtZSI6IlJ1cGFsaSBTaGFoIn0.lqKHXKG7FWxwaoIBgowQ1wcPgZ8XLdKXZCFYElSdcJQ'
 
 const RegisterAsVendor = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({
     name: "",
+    walletJson: {},
     mobile: null,
     address: "",
     aadhar: null,
@@ -14,26 +22,99 @@ const RegisterAsVendor = () => {
     type: "vendor",
   });
 
-  //Signup
-  const signupUser = async (e) => {
-    e.preventDefault();
-    console.log(user);
+  const [f,setF] = useState(null);
 
+  const uploadToIPFS = async (jData) =>{
+    const data = JSON.stringify({
+    user
+   });
+   try {
+    const nftstorage = new NFTStorage({ token: NFT_STORAGE_KEY });
+    const url = await nftstorage.store({
+      name: data,
+      description: jData,
+      image: f
+    })
+       // run a function that creates sale and passes in th url 
+      console.log(url);
+   } catch (error) {
+       console.log('Error uploading file:', error);
+   }
+  }
+  const saveInDB = async () => {
+    console.log("r");
+    await uploadToIPFS("res");
     const promise = functions.createExecution(
       process.env.REACT_APP_SIGNUP_FUNC_ID,
       JSON.stringify(user)
     );
 
+   
     promise.then(
       function (response) {
         console.log(response);
-        navigate("/profile"); //success
-      },
-      function (error) {
+        navigate("/profile", { replace: true }); //success
+      }, function (error) {
         console.log(error); // Failure
       }
     );
+  }
+
+
+  //Signup
+  const signupUser = async (e) => {
+    
+    if(f){
+      e.preventDefault();
+    
+      const randomWallet = ethers.Wallet.createRandom();
+      console.log(randomWallet);
+  
+   
+   function callback(progress) {
+      console.log("Encrypting: " + parseInt(progress * 100) + "% complete");
+  }
+  
+  let encryptPromise =  randomWallet.encrypt(user.password, callback);
+  let jData;
+  encryptPromise.then(async function(json) {
+      console.log(json);
+  jData = json
+
+  
+     
+   setUser({
+    ...user,
+    walletJson: jData,
+  })
+  console.log(jData);
+   
+     user.walletJson = jData;
+     
+    
+
+   
+  
+
+  
+  ethers.Wallet.fromEncryptedJson(json, user.password).then(async function(wallet) {
+      console.log("Address: " + wallet.address);
+      await saveInDB();
+  
+      // "Address: 0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290"
+  });
+  
+  })
+  
+     
+    
+
+
+    }
+ 
   };
+
+
   return (
     <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-lg text-center">
@@ -44,6 +125,18 @@ const RegisterAsVendor = () => {
 
       <form className="mx-auto mt-8 mb-0 max-w-md space-y-4">
         <div>
+        <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Profile Picture
+          </label>
+
+        <input type="file"  className="w-full mt-2 rounded-lg border-gray-200 p-4 pr-12 text-sm shadow-sm"   required onChange={(e)=> {
+        setF(e.target.files[0]);
+        console.log(e.target.files[0])
+      }}></input>
+        
           <label
             htmlFor="name"
             className="block text-sm font-medium text-gray-700"
