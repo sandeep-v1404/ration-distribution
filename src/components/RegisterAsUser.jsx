@@ -1,11 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { functions } from "../appwrite/config";
+import { ethers,Contract,utils } from 'ethers'
+import Web3Modal from 'web3modal'
+
+import axios from 'axios'
+import { NFTStorage, File } from 'nft.storage'
+
+
+
+const NFT_STORAGE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDgwMjlFMGVFNWVGRmQxZjhGNEI2MjRDODUyQjYwMGFjMkMwNDU2M2UiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1ODExOTEzNjY1MiwibmFtZSI6IlJ1cGFsaSBTaGFoIn0.lqKHXKG7FWxwaoIBgowQ1wcPgZ8XLdKXZCFYElSdcJQ'
+
 
 const RegisterAsUser = () => {
   const navigate = useNavigate();
+  const [u,setUrl] = useState("");
   const [user, setUser] = useState({
     name: "",
+    walletJson: "",
     mobile: null,
     address: "",
     aadhar: null,
@@ -13,25 +25,125 @@ const RegisterAsUser = () => {
     password: "",
     type: "user",
   });
+  const [f,setF] = useState(null);
 
+  const saveDataBlokchain = async () => {
+
+    let abi = [
+      "function verifyString(string, uint8, bytes32, bytes32) public pure returns (address)"
+  ];
+  
+   let provider = ethers.getDefaultProvider("goerli");
+  
+  // Create a wallet to sign the message with
+  ethers.Wallet.fromEncryptedJson(user.walletJson, user.password).then(async function(wallet) {
+    console.log("Address: " + wallet.address);
+  //   let contractAddress = '0x80F85dA065115F576F1fbe5E14285dA51ea39260';
+  // let contract = new Contract(contractAddress, abi, provider);
+  let eUrl = utils.keccak256(utils.toUtf8Bytes(u));
+  let message = {rNo: user.aadhar,walletAddress: wallet.address,url: eUrl};
+  
+  // Sign the string message
+  let flatSig = await wallet.signMessage(message);
+  
+  // For Solidity, we need the expanded-format of a signature
+  let sig = ethers.utils.splitSignature(flatSig);
+  console.log(sig,flatSig);
+    // "Address: 0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290"
+});
+  
+  // console.log(wallet.address);
+  // "0x14791697260E4c9A71f18484C9f997B308e59325"
+  
+  
+  // Call the verifyString function
+  // let recovered = await contract.verifyString(message, sig.v, sig.r, sig.s);
+  
+  // console.log(recovered);
+
+ 
+  // "0x14791697260E4c9A71f18484C9f997B308e59325"
+  }
+
+  const uploadToIPFS = async () =>{
+    const data = JSON.stringify({
+    user
+   });
+   try {
+    const nftstorage = new NFTStorage({ token: NFT_STORAGE_KEY });
+    const url = await nftstorage.store({
+      name: data,
+      description: "res",
+      image: f
+    })
+       // run a function that creates sale and passes in th url 
+      console.log(url);
+      setUrl(url);
+   } catch (error) {
+       console.log('Error uploading file:', error);
+   }
+  }
   //Signup
   const signupUser = async (e) => {
-    e.preventDefault();
+    if(f){
+      e.preventDefault();
+    
+      const randomWallet = ethers.Wallet.createRandom();
+      console.log(randomWallet);
+  
+   
+   function callback(progress) {
+      console.log("Encrypting: " + parseInt(progress * 100) + "% complete");
+  }
+  
+  let encryptPromise =  randomWallet.encrypt(user.password, callback);
+  let jData;
+  encryptPromise.then(function(json) {
+      console.log(json);
+  jData = json
+     
+  setUser({
+    ...user,
+    walletJson: jData,
+  })
+
+  console.log(jData);
+  user.walletJson = jData;
+     
+    
+   
+     uploadToIPFS();
+     
     const promise = functions.createExecution(
       process.env.REACT_APP_SIGNUP_FUNC_ID,
       JSON.stringify(user)
     );
 
+   
     promise.then(
       function (response) {
+        saveDataBlokchain();
         console.log(response);
         navigate("/profile", { replace: true }); //success
-      },
-      function (error) {
+      }, function (error) {
         console.log(error); // Failure
       }
     );
-  };
+
+
+  
+  
+  });
+  
+     
+    
+     
+
+    }
+      };
+
+
+
   return (
     <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-lg text-center">
@@ -42,6 +154,17 @@ const RegisterAsUser = () => {
 
       <form className="mx-auto mt-8 mb-0 max-w-md space-y-4">
         <div>
+        <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Profile Picture
+          </label>
+
+        <input type="file"   required onChange={(e)=> {
+        setF(e.target.files[0]);
+        console.log(e.target.files[0])
+      }}></input>
           <label
             htmlFor="name"
             className="block text-sm font-medium text-gray-700"
