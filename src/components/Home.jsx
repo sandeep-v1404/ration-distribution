@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Home2 = () => {
+const Home = () => {
   const navigate = useNavigate();
   return (
     <section class="bg-white">
@@ -109,4 +109,4 @@ const Home2 = () => {
   );
 };
 
-export default Home2;
+export default Home;

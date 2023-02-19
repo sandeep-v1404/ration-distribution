@@ -1,6 +1,4 @@
 const sdk = require("node-appwrite");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const { ID, Query } = require("node-appwrite");
 /*
   'req' variable has:
@@ -29,26 +27,11 @@ module.exports = async function (req, res) {
       .setKey(req.variables["APPWRITE_FUNCTION_API_KEY"]);
   }
 
-  const {
-    name,
-    mobile,
-    address,
-    aadhar,
-    category,
-    password,
-    type,
-    walletJson,
-  } = JSON.parse(req.payload ?? "{}");
+  const { productName, quantity, APL_Price, BPL_Price } = JSON.parse(
+    req.payload ?? "{}"
+  );
 
-  if (
-    !name ||
-    !mobile ||
-    !address ||
-    !aadhar ||
-    !password ||
-    !type ||
-    !walletJson
-  ) {
+  if (!productName || !quantity || !APL_Price || !BPL_Price) {
     return res.json({
       success: false,
       message: "Invalid payload.",
@@ -56,53 +39,35 @@ module.exports = async function (req, res) {
     });
   }
 
-  const aadharCheck = await database.listDocuments(
+  const productNameCheck = await database.listDocuments(
     req.variables["databaseId"],
     req.variables["collectionId"],
-    [Query.equal("aadhar", parseInt(aadhar))]
+    [Query.equal("productName", productName)]
   );
 
-  const mobileCheck = await database.listDocuments(
-    req.variables["databaseId"],
-    req.variables["collectionId"],
-    [Query.equal("mobile", parseInt(mobile))]
-  );
-
-  if (aadharCheck.total > 0 || mobileCheck.total > 0) {
+  if (productNameCheck.total > 0) {
     return res.json({
       success: false,
-      message: "User Exists",
+      message: "Product Exists",
     });
   } else {
-    const hashedPassword = await bcrypt.hash(password, 12);
     const promise2 = database.createDocument(
       req.variables["databaseId"],
       req.variables["collectionId"],
       ID.unique(),
       {
-        name,
-        mobile,
-        address,
-        aadhar,
-        category,
-        password: hashedPassword,
-        type,
-        walletJson,
+        productName,
+        quantity,
+        APL_Price,
+        BPL_Price,
       }
     );
 
     promise2
       .then(function (data) {
-        const token = jwt.sign(
-          { name, mobile, address, aadhar, category, type, id: data.$id },
-          "asasasas",
-          {
-            expiresIn: "1h",
-          }
-        );
         return res.json({
           success: true,
-          token,
+          data: data,
         });
       })
       .catch(function (err) {
